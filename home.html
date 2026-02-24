@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>Home - Minimum Coin Change System</title>
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <div class="page-wrapper">
+      <!-- Top Navigation Bar -->
+      <nav class="navbar">
+        <div class="navbar-left">
+          <a href="index.html" class="logo">💰 Coin Change</a>
+        </div>
+        <div class="navbar-right">
+          <span id="user-greeting" class="user-greeting"></span>
+          <button id="logout-btn" class="btn btn-text" style="display:none;">Log out</button>
+          <a id="login-link" href="login.html" class="btn btn-outline btn-sm">Log in</a>
+          <a id="signup-link" href="signup.html" class="btn btn-primary btn-sm">Sign up</a>
+        </div>
+      </nav>
+
+      <main class="home-container">
+        <section class="calculator-section">
+          <div class="calculator-card" id="calc-card">
+            <!-- Bitcoin background with blur is applied via CSS -->
+            <h2 class="calc-title">💱 Coin Change Calculator</h2>
+            <p class="calc-desc">Enter an amount to find the minimum coins needed</p>
+
+            <div class="form-group">
+              <label for="amount">Amount to Change</label>
+              <input id="amount" type="number" min="0" value="93" placeholder="e.g., 93" />
+            </div>
+
+            <div class="button-group">
+              <button id="compute-btn" class="btn btn-primary">Calculate Minimum Coins</button>
+              <button id="compare-btn" class="btn btn-secondary">Compare Algorithms</button>
+            </div>
+
+            <div id="results" class="results-container">
+              <!-- Results will be injected here -->
+            </div>
+          </div>
+
+          <section class="info-section">
+            <div class="info-card">
+              <h3>📊 How It Works</h3>
+              <ul>
+                <li><strong>Greedy:</strong> Selects largest denominations first. Fast and optimal for real currencies.</li>
+                <li><strong>DP (Dynamic Programming):</strong> Guaranteed minimum coins for any denomination set.</li>
+                <li><strong>Denominations Used:</strong> 50, 20, 10, 5, 2, 1 (standard currency)</li>
+              </ul>
+            </div>
+          </section>
+        </section>
+      </main>
+
+      <footer class="page-footer">
+        <small>© 2025 Coin Change System. All rights reserved.</small>
+      </footer>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+      // Home page initialization and event handling
+
+      function updateUserUI() {
+        const user = currentUser();
+        const userGreeting = document.getElementById('user-greeting');
+        const logoutBtn = document.getElementById('logout-btn');
+        const loginLink = document.getElementById('login-link');
+        const signupLink = document.getElementById('signup-link');
+
+        if (user) {
+          userGreeting.textContent = `👤 ${user}`;
+          logoutBtn.style.display = 'inline-block';
+          loginLink.style.display = 'none';
+          signupLink.style.display = 'none';
+        } else {
+          userGreeting.textContent = '';
+          logoutBtn.style.display = 'none';
+          loginLink.style.display = 'inline-block';
+          signupLink.style.display = 'inline-block';
+        }
+      }
+
+      document.getElementById('logout-btn').addEventListener('click', () => {
+        logout();
+        updateUserUI();
+        alert('Logged out successfully!');
+      });
+
+      function readDenoms() {
+        return [50, 20, 10, 5, 2, 1]; // Fixed default currency denominations
+      }
+
+      function renderResult(title, out) {
+        if (!out) return `<h4>${title}</h4><p class="warn">❌ No solution found</p>`;
+        const lines = [];
+        lines.push(`<h4>${title}</h4>`);
+        lines.push(`<p><strong>Count:</strong> ${out.count} coins/notes</p>`);
+        lines.push(`<p><strong>Breakdown:</strong> ${out.sequence.join(' + ')}</p>`);
+        const counts = Object.keys(out.byDenom || {})
+          .sort((a, b) => b - a)
+          .map(d => `${d}×${out.byDenom[d]}`);
+        if (counts.length) lines.push(`<p><strong>Counts:</strong> ${counts.join(', ')}</p>`);
+        return lines.join('\n');
+      }
+
+      function showComparison() {
+        const amt = parseInt(document.getElementById('amount').value, 10);
+        const denoms = readDenoms();
+        const g = greedyChange(amt, denoms);
+        const d = dpChange(amt, denoms);
+        const container = document.getElementById('results');
+        let html = '';
+
+        if (!g && !d) {
+          html = '<p class="warn">❌ No valid solution for the given amount and denominations.</p>';
+        } else {
+          html += '<div class="result-row">';
+          html += '<div class="result-col">';
+          html += renderResult('⚡ Greedy Algorithm', g) || '';
+          html += '</div>';
+          html += '<div class="result-col">';
+          html += renderResult('🎯 Dynamic Programming', d) || '';
+          html += '</div>';
+          html += '</div>';
+
+          if (g && d) {
+            if (g.count === d.count) {
+              html += '<p class="ok">✅ Both algorithms found the same optimal solution!</p>';
+            } else {
+              html += `<p class="warn">⚠️ Greedy used ${g.count - d.count} more coins/notes than DP.</p>`;
+            }
+          }
+        }
+        container.innerHTML = html;
+      }
+
+      function showGreedyOnly() {
+        const amt = parseInt(document.getElementById('amount').value, 10);
+        const denoms = readDenoms();
+        const result = greedyChange(amt, denoms);
+        document.getElementById('results').innerHTML = renderResult('⚡ Greedy Algorithm', result);
+      }
+
+      document.getElementById('compute-btn').addEventListener('click', showGreedyOnly);
+      document.getElementById('compare-btn').addEventListener('click', showComparison);
+
+      // Initialize UI on page load
+      updateUserUI();
+    </script>
+  </body>
+</html>
