@@ -61,54 +61,35 @@
     // Utility function, currently auth is not strictly enforced sitewide
   };
 
-  // ---- Coin change algorithms ----
-  // Greedy: sort descending, pick largest until exhausted
-  window.greedyChange = function(amount, denoms){
-    if(!Array.isArray(denoms) || denoms.length===0) return null;
-    denoms = denoms.filter(d=>d>0);
-    denoms.sort((a,b)=>b-a);
-    let rem = amount;
-    const seq = [];
-    const byDenom = {};
-    for(const c of denoms){
-      while(rem >= c){
-        rem -= c; seq.push(c);
-        byDenom[c] = (byDenom[c]||0)+1;
-      }
+  // ---- Coin change algorithms (Backend API) ----
+  window.greedyChange = async function(amount, denoms){
+    try {
+      const response = await fetch('/api/algorithms/greedy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount, denoms })
+      });
+      const result = await response.json();
+      return result.success ? result.data : null;
+    } catch (err) {
+      console.error('Greedy fetch failed:', err);
+      return null;
     }
-    if(rem !== 0) return null; // no solution
-    return {count: seq.length, sequence: seq, byDenom};
   };
 
-  // DP: classic coin change to minimize number of coins, reconstruct solution
-  window.dpChange = function(amount, denoms){
-    denoms = denoms.filter(d=>d>0);
-    const INF = 1e9;
-    const dp = new Array(amount+1).fill(INF);
-    const prev = new Array(amount+1).fill(-1);
-    dp[0] = 0;
-    for(let i=1;i<=amount;i++){
-      for(const c of denoms){
-        if(c<=i && dp[i-c]+1 < dp[i]){
-          dp[i] = dp[i-c]+1;
-          prev[i] = c;
-        }
-      }
+  window.dpChange = async function(amount, denoms){
+    try {
+      const response = await fetch('/api/algorithms/dp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount, denoms })
+      });
+      const result = await response.json();
+      return result.success ? result.data : null;
+    } catch (err) {
+      console.error('DP fetch failed:', err);
+      return null;
     }
-    if(dp[amount] >= INF) return null;
-    // reconstruct
-    let cur = amount; const seq = []; const byDenom = {};
-    while(cur>0){
-      const c = prev[cur];
-      if(c==-1) break; // safety
-      seq.push(c);
-      byDenom[c] = (byDenom[c]||0)+1;
-      cur -= c;
-    }
-    return {count: seq.length, sequence: seq.reverse(), byDenom};
   };
-
-  // Expose for debugging in console
-  window.__cc = {createUser: window.createUser, loginUser: window.loginUser, greedyChange: window.greedyChange, dpChange: window.dpChange};
 
 })();

@@ -127,11 +127,13 @@
         }});
       }
 
-      function showComparison() {
+      async function showComparison() {
         const amt = parseInt(document.getElementById('amount').value, 10);
         const denoms = readDenoms();
-        const g = greedyChange(amt, denoms);
-        const d = dpChange(amt, denoms);
+        const [g, d] = await Promise.all([
+          greedyChange(amt, denoms),
+          dpChange(amt, denoms)
+        ]);
         
         let html = '';
         if (!g && !d) {
@@ -153,10 +155,10 @@
         animateResults(html);
       }
 
-      function showGreedyOnly() {
+      async function showGreedyOnly() {
         const amt = parseInt(document.getElementById('amount').value, 10);
         const denoms = readDenoms();
-        const result = greedyChange(amt, denoms);
+        const result = await greedyChange(amt, denoms);
         animateResults(renderResult('⚡ Greedy Analysis', result));
       }
 
