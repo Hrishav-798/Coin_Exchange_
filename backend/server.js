@@ -4,6 +4,7 @@ const cors = require('cors');
 require('dotenv').config();
 
 const authRoutes = require('./routes/authRoutes');
+const algorithmRoutes = require('./routes/algorithmRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -36,6 +37,7 @@ app.get('/signup', (req, res) => {
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/algorithms', algorithmRoutes);
 
 // MongoDB Connection
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/coin_exchange';
