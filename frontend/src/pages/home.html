@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#050505" />
+    <title>Dashboard - CoinChange Professional</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+    <!-- GSAP for Smooth Experience -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="/js/app.js"></script>
+    <script>
+      // STRICT ROUTE PROTECTION
+      if (typeof currentUser === 'function') {
+        const user = currentUser();
+        if (!user) {
+          window.location.href = "/login";
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div class="page-wrapper">
+      <!-- Top Navigation Bar -->
+      <nav class="navbar">
+        <div class="navbar-left">
+          <a href="/" class="logo">💰 CoinChange</a>
+        </div>
+        <div class="navbar-right">
+          <span id="user-greeting" class="user-greeting"></span>
+          <button id="logout-btn" class="btn btn-text" style="display:none; color: var(--text-secondary);">Log out</button>
+          <a id="login-link" href="/login" class="btn btn-outline btn-sm" style="display:none;">Log in</a>
+          <a id="signup-link" href="/signup" class="btn btn-primary btn-sm" style="display:none;">Sign up</a>
+        </div>
+      </nav>
+
+      <main class="home-container">
+        <section class="calculator-section">
+          <div class="calculator-card glass-panel" id="calc-card">
+            <p class="hero-subtitle" style="font-size: 0.9rem; margin-bottom: 8px;">Algorithm engine</p>
+            <h2 class="calc-title">Coin Change Solver</h2>
+            <p class="calc-desc">Enter a value to synthesize the optimal currency breakdown.</p>
+
+            <div class="form-group" style="max-width: 400px; margin: 0 auto 32px auto; display: flex; flex-direction: column;">
+              <label for="amount">Target Amount</label>
+              <input id="amount" type="number" min="0" value="93" placeholder="e.g., 93" />
+            </div>
+
+            <div class="button-group" style="justify-content: center;">
+              <button id="compute-btn" class="btn btn-primary">Calculate Optimal</button>
+              <button id="compare-btn" class="btn btn-outline" style="border-color: rgba(255,255,255,0.1); color: white;">Compare Logic</button>
+            </div>
+
+            <div id="results" class="results-container">
+              <!-- Results will be injected here -->
+            </div>
+          </div>
+
+          <section class="info-section">
+            <div class="info-card glass-panel">
+              <h3 style="color: var(--primary); font-family: 'Outfit'; font-weight: 700;">Engine Specs</h3>
+              <ul style="margin-top: 16px;">
+                <li><strong>⚡ Greedy Matrix:</strong> Real-time heuristic. Best for standard currencies.</li>
+                <li><strong>🎯 DP Architecture:</strong> Brute-force optimal. Solves non-canonical systems.</li>
+                <li><strong>🏦 Vault Denoms:</strong> 50, 20, 10, 5, 2, 1 (Standard Liquidity)</li>
+              </ul>
+            </div>
+          </section>
+        </section>
+      </main>
+
+      <footer class="page-footer" style="border:none;">
+        <small>© 2025 CoinChange Professional Environment. Secure Session.</small>
+      </footer>
+    </div>
+
+    <script>
+      function updateUserUI() {
+        const user = currentUser();
+        const userGreeting = document.getElementById('user-greeting');
+        const logoutBtn = document.getElementById('logout-btn');
+
+        if (user) {
+          userGreeting.textContent = `👤 ${user}`;
+          logoutBtn.style.display = 'inline-block';
+        } else {
+          window.location.href = "/login";
+        }
+      }
+
+      document.getElementById('logout-btn').addEventListener('click', () => {
+        logout();
+        window.location.href = "/";
+      });
+
+      function readDenoms() {
+        return [50, 20, 10, 5, 2, 1];
+      }
+
+      function renderResult(title, out) {
+        if (!out) return `
+          <div class="result-col" style="border-color: var(--danger);">
+            <h4>${title}</h4>
+            <p class="warn">❌ System Failure: No solution feasible.</p>
+          </div>`;
+        
+        const counts = Object.keys(out.byDenom || {})
+          .sort((a, b) => b - a)
+          .map(d => `<span style="background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(255,155,38,0.2);">${d}×${out.byDenom[d]}</span>`);
+        
+        return `
+          <div class="result-col">
+            <h4 style="color: var(--primary); margin-bottom: 12px;">${title}</h4>
+            <p style="margin: 8px 0;"><strong>Core Count:</strong> ${out.count} units</p>
+            <p style="margin: 8px 0;"><strong>Breakdown:</strong> ${out.sequence.join(' + ')}</p>
+            <div style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
+              ${counts.join('')}
+            </div>
+          </div>`;
+      }
+
+      function animateResults(html) {
+        const container = document.getElementById('results');
+        gsap.to(container, { opacity: 0, y: 10, duration: 0.2, onComplete: () => {
+          container.innerHTML = html;
+          gsap.fromTo(container, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 });
+        }});
+      }
+
+      function showComparison() {
+        const amt = parseInt(document.getElementById('amount').value, 10);
+        const denoms = readDenoms();
+        const g = greedyChange(amt, denoms);
+        const d = dpChange(amt, denoms);
+        
+        let html = '';
+        if (!g && !d) {
+          html = '<p class="warn" style="text-align: center; padding: 20px;">❌ Critical Error: No valid solution found.</p>';
+        } else {
+          html += '<div class="result-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 24px;">';
+          html += renderResult('⚡ Greedy Analysis', g) || '';
+          html += renderResult('🎯 DP Synthesis', d) || '';
+          html += '</div>';
+
+          if (g && d) {
+            if (g.count === d.count) {
+              html += '<p style="text-align: center; color: var(--success); font-weight: 500;">✅ Convergence: Both engines achieved theoretical optimality.</p>';
+            } else {
+              html += `<p style="text-align: center; color: var(--warning);">⚠️ Delta Detected: Greedy utilized ${g.count - d.count} additional unit(s).</p>`;
+            }
+          }
+        }
+        animateResults(html);
+      }
+
+      function showGreedyOnly() {
+        const amt = parseInt(document.getElementById('amount').value, 10);
+        const denoms = readDenoms();
+        const result = greedyChange(amt, denoms);
+        animateResults(renderResult('⚡ Greedy Analysis', result));
+      }
+
+      document.getElementById('compute-btn').addEventListener('click', showGreedyOnly);
+      document.getElementById('compare-btn').addEventListener('click', showComparison);
+
+      window.addEventListener('DOMContentLoaded', () => {
+        updateUserUI();
+        gsap.from(".calculator-card", { opacity: 0, scale: 0.95, y: 30, duration: 1, ease: "power4.out" });
+        gsap.from(".navbar", { y: -100, duration: 1, ease: "power4.out" });
+        gsap.from(".info-card", { opacity: 0, y: 20, duration: 1, delay: 0.5 });
+      });
+    </script>
+  </body>
+</html>

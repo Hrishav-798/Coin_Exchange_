@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#050505" />
+    <title>CoinChange - Premium Algorithm Explorer</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+    <!-- GSAP for Professional Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  </head>
+  <body>
+    <main class="landing">
+      <div class="landing-hero">
+        <div class="hero-content">
+          <p class="hero-subtitle">Premium Intelligence</p>
+          <h1 class="hero-title">Minimum Coin<br>Change System</h1>
+          <p class="hero-desc">
+            Experience the pinnacle of algorithmic efficiency. Compare Greedy and Dynamic Programming 
+            approaches with real-time feedback in a high-performance environment.
+          </p>
+          <div class="hero-actions">
+            <a id="cta-btn" href="/home" class="btn btn-primary">Enter Dashboard</a>
+            <a href="#features" class="btn btn-outline" style="color: white; border-color: rgba(255,255,255,0.2);">Explore Features</a>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="coin-animation">💰</div>
+        </div>
+      </div>
+
+      <section id="features" class="features">
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <h3>Greedy Engine</h3>
+          <p>Ultra-fast computation for standard systems. Optimized for real-time currency exchange.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎯</div>
+          <h3>DP Precision</h3>
+          <p>Mathematical certainty for any denomination. Guaranteed optimal results every time.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔄</div>
+          <h3>Algorithm Dual</h3>
+          <p>Side-by-side comparison reveals the architectural strengths of modern solvers.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🛡️</div>
+          <h3>Secure Architecture</h3>
+          <p>Professional-grade authentication ensures your data and session remain private.</p>
+        </div>
+      </section>
+
+      <footer class="landing-footer">
+        <small>© 2025 CoinChange Professional. Refined with excellence.</small>
+      </footer>
+    </main>
+
+    <script src="/js/app.js"></script>
+    <script>
+      // Professional Reveal Animations
+      window.addEventListener('DOMContentLoaded', () => {
+        const tl = gsap.timeline({ defaults: { ease: "power4.out", duration: 1.2 }});
+        
+        tl.from(".hero-subtitle", { opacity: 0, y: 20, delay: 0.2 })
+          .from(".hero-title", { opacity: 0, y: 30 }, "-=0.8")
+          .from(".hero-desc", { opacity: 0, y: 20 }, "-=0.8")
+          .from(".hero-actions", { opacity: 0, y: 20 }, "-=0.8")
+          .from(".hero-visual", { opacity: 0, scale: 0.8, rotate: -10 }, "-=1")
+          .from(".feature-card", { 
+            opacity: 0, 
+            y: 40, 
+            stagger: 0.1, 
+            duration: 1
+          }, "-=0.6");
+
+        // Auth-aware CTA button
+        if (typeof currentUser === 'function') {
+          const ctaBtn = document.getElementById('cta-btn');
+          if (!currentUser()) {
+            ctaBtn.href = "/login";
+            ctaBtn.textContent = "Sign In to Start";
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
