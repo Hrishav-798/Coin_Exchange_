@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 const User = require('../models/User');
 
 const router = express.Router();
@@ -48,7 +49,19 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Username and password required' });
     }
 
-    // Check if user exists
+    // Fallback for demo user if database is disconnected
+    if (mongoose.connection.readyState !== 1) {
+      if (username === 'saptarshi' && password === '2005') {
+        const payload = { user: { id: 'demo_offline_mode', username: 'saptarshi' } };
+        const jwtSecret = process.env.JWT_SECRET || 'fallback_secret_keep_it_safe_in_prod';
+        const token = jwt.sign(payload, jwtSecret, { expiresIn: '2h' });
+        return res.json({ success: true, token, username: 'saptarshi', message: 'Login successful (Offline Demo Mode)' });
+      } else {
+        return res.status(400).json({ success: false, message: 'Database offline. Only default demo user is available.' });
+      }
+    }
+
+    // Check if user exists (when DB is online)
     const user = await User.findOne({ username });
     if (!user) {
       return res.status(400).json({ success: false, message: 'Invalid credentials' });

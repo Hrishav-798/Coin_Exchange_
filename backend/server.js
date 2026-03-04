@@ -40,12 +40,33 @@ app.use('/api/auth', authRoutes);
 // MongoDB Connection
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/coin_exchange';
 
+const User = require('./models/User');
+const bcrypt = require('bcryptjs');
+
 mongoose
-  .connect(MONGODB_URI)
-  .then(() => console.log('✅ Connected to MongoDB successfully'))
+  .connect(MONGODB_URI, { serverSelectionTimeoutMS: 5000 })
+  .then(async () => {
+    console.log('✅ Connected to MongoDB successfully');
+    
+    try {
+      // Seed default user
+      const username = 'saptarshi';
+      const password = '2005';
+      let user = await User.findOne({ username });
+      if (!user) {
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+        user = new User({ username, password: hashedPassword });
+        await user.save();
+        console.log(`✅ Default demo user '${username}' seeded automatically.`);
+      }
+    } catch (seedErr) {
+      console.error('❌ Failed to seed default user:', seedErr);
+    }
+  })
   .catch((err) => {
-    console.error('❌ Failed to connect to MongoDB', err);
-    process.exit(1); // Exit process with failure
+    console.error('❌ Failed to connect to MongoDB:', err.message);
+    console.warn('⚠️ Server will still run, but login/signup will be unavailable until the database connects.');
   });
 
 // Start the server
