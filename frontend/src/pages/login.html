@@ -4,13 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#050505" />
-    <title>Log In - CoinChange Professional</title>
+    <title>Authorize - CoinChange Professional</title>
     <link rel="stylesheet" href="/css/styles.css" />
   </head>
   <body>
     <div class="auth-container">
       <div class="auth-card glass-panel">
-        <h1 style="font-family: 'Outfit'; font-weight: 800; margin-bottom: 8px;">Log In</h1>
+        <h1 style="font-family: 'Outfit'; font-weight: 800; margin-bottom: 8px;">Authorize Existing</h1>
         <p class="subtitle" style="margin-bottom: 32px;">Secure access to the algorithm matrix</p>
 
         <form id="login-form" class="form">
@@ -45,7 +45,7 @@
         
         msg.style.display = 'block';
         msg.className = 'auth-message';
-        msg.textContent = 'Verifying identity...';
+        msg.textContent = 'Verifying access key...';
 
         const res = await loginUser(u, p);
         

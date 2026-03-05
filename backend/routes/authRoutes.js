@@ -33,9 +33,9 @@ router.post('/register', async (req, res) => {
 
     await newUser.save();
 
-    res.status(201).json({ success: true, message: 'User registered successfully' });
+    res.status(201).json({ success: true, message: 'Identity created successfully' });
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error('Registration error:', error.message);
     res.status(500).json({ success: false, message: 'Server error during registration' });
   }
 });
@@ -55,7 +55,7 @@ router.post('/login', async (req, res) => {
         const payload = { user: { id: 'demo_offline_mode', username: 'saptarshi' } };
         const jwtSecret = process.env.JWT_SECRET || 'fallback_secret_keep_it_safe_in_prod';
         const token = jwt.sign(payload, jwtSecret, { expiresIn: '2h' });
-        return res.json({ success: true, token, username: 'saptarshi', message: 'Login successful (Offline Demo Mode)' });
+        return res.json({ success: true, token, username: 'saptarshi', message: 'Authorization successful (Offline Demo Mode)' });
       } else {
         return res.status(400).json({ success: false, message: 'Database offline. Only default demo user is available.' });
       }
@@ -91,7 +91,7 @@ router.post('/login', async (req, res) => {
       { expiresIn: '2h' }, // Token expires in 2 hours
       (err, token) => {
         if (err) throw err;
-        res.json({ success: true, token, username: user.username, message: 'Login successful' });
+        res.json({ success: true, token, username: user.username, message: 'Authorization successful' });
       }
     );
   } catch (error) {
